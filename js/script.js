@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initDiscordButton();
     initSmoothScroll();
     initImageModal();
+    initCategorySwitching();
+    initVideoModal();
 });
 
 /* ============================================
@@ -349,11 +351,29 @@ function initImageModal() {
     }
     
     // Update modal image
-    function updateModalImage() {
+    function updateModalImage(direction = 'none') {
         const images = galleries[currentGallery] || galleries[Object.keys(galleries)[0]];
-        if (modalImage && images[currentIndex]) {
+        if (!modalImage || !images[currentIndex]) return;
+        
+        if (direction === 'none') {
             modalImage.src = images[currentIndex];
+        } else {
+            const outClass = direction === 'next' ? 'animate-out-left' : 'animate-out-right';
+            const inClass = direction === 'next' ? 'animate-in-right' : 'animate-in-left';
+            
+            modalImage.classList.add(outClass);
+            
+            setTimeout(() => {
+                modalImage.src = images[currentIndex];
+                modalImage.classList.remove(outClass);
+                modalImage.classList.add(inClass);
+                
+                setTimeout(() => {
+                    modalImage.classList.remove(inClass);
+                }, 300);
+            }, 200);
         }
+        
         if (modalCurrent) {
             modalCurrent.textContent = currentIndex + 1;
         }
@@ -363,14 +383,14 @@ function initImageModal() {
     function prevImage() {
         const images = galleries[currentGallery] || galleries[Object.keys(galleries)[0]];
         currentIndex = (currentIndex - 1 + images.length) % images.length;
-        updateModalImage();
+        updateModalImage('prev');
     }
     
     // Navigate to next image
     function nextImage() {
         const images = galleries[currentGallery] || galleries[Object.keys(galleries)[0]];
         currentIndex = (currentIndex + 1) % images.length;
-        updateModalImage();
+        updateModalImage('next');
     }
     
     // Event listeners for gallery items
@@ -445,3 +465,103 @@ function initImageModal() {
         }
     }
 }
+
+/* ============================================
+   Category Switching Logic
+   ============================================ */
+
+function initCategorySwitching() {
+    const categoryBlocks = document.querySelectorAll('.category-block');
+    const categorySections = document.querySelectorAll('.category-section');
+    let currentCategory = 'project-reviews'; // Default active category
+    
+    if (categoryBlocks.length === 0) return;
+    
+    categoryBlocks.forEach(block => {
+        block.addEventListener('click', () => {
+            const category = block.getAttribute('data-category');
+            
+            // If clicking the already active category, do nothing
+            if (category === currentCategory) return;
+            
+            // Update active block
+            categoryBlocks.forEach(b => b.classList.remove('active'));
+            block.classList.add('active');
+            
+            // Switch sections
+            categorySections.forEach(section => {
+                if (section.id === category) {
+                    // Prepare section for animation
+                    section.classList.remove('hidden');
+                    section.style.opacity = '0';
+                    section.style.transform = 'translateY(40px)';
+                    
+                    // Trigger animation
+                    setTimeout(() => {
+                        section.style.animation = 'none';
+                        section.style.animationDelay = '0s';
+                        section.offsetHeight; // Trigger reflow
+                        section.style.animation = null;
+                        section.style.opacity = null;
+                        section.style.transform = null;
+                    }, 10);
+                    
+                    currentCategory = category;
+                } else {
+                    section.classList.add('hidden');
+                }
+            });
+            
+            // Smooth scroll to the section start if on mobile
+            if (window.innerWidth < 768) {
+                const activeSection = document.getElementById(category);
+                if (activeSection) {
+                    setTimeout(() => {
+                        activeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                }
+            }
+        });
+    });
+}
+
+/* ============================================
+   Video Modal Logic
+   ============================================ */
+
+function initVideoModal() {
+    const videoModal = document.getElementById('videoModal');
+    const videoIframe = document.getElementById('videoIframe');
+    const videoClose = document.getElementById('videoModalClose');
+    const videoItems = document.querySelectorAll('.video-item');
+    
+    if (!videoModal || !videoIframe || videoItems.length === 0) return;
+    
+    videoItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const videoUrl = item.getAttribute('data-video');
+            if (videoUrl) {
+                videoIframe.src = videoUrl;
+                videoModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        });
+    });
+    
+    function closeVideoModal() {
+        videoModal.classList.remove('active');
+        videoIframe.src = ''; // Stop video playback
+        document.body.style.overflow = '';
+    }
+    
+    if (videoClose) {
+        videoClose.addEventListener('click', closeVideoModal);
+    }
+    
+    videoModal.addEventListener('click', (e) => {
+        if (e.target === videoModal) {
+            closeVideoModal();
+        }
+    });
+}
+
