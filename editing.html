@@ -28,6 +28,19 @@
             </header>
             
             <section class="skill-content">
+                <!-- Video Previews -->
+                <div class="gui-gallery-grid mb-4" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="video-item fade-in-up delay-2" data-video="https://drive.google.com/file/d/13gySoVRw8sAYet61HGZa1-R8D7XA_79t/preview" style="aspect-ratio: 16/9;">
+                        <div class="video-thumbnail">
+                            <img src="assets/thumbnails/video_editing_thumbnail.png" alt="Video Preview">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Main Description Card -->
                 <article class="skill-card fade-in-up delay-2">
                     <h2 class="skill-card-title">
@@ -119,6 +132,19 @@
         </main>
     </div>
     
+    <!-- Video Modal -->
+    <div class="modal-overlay" id="videoModal">
+        <div class="video-modal-container">
+            <button class="modal-close" id="videoModalClose">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <iframe src="" class="video-iframe" id="videoIframe" allow="autoplay; fullscreen"></iframe>
+        </div>
+    </div>
+
     <script src="js/script.js"></script>
 </body>
 </html>
