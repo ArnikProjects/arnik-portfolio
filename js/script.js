@@ -215,27 +215,49 @@ function initDiscordButton() {
    ============================================ */
 
 function initSmoothScroll() {
-    // Handle smooth scroll for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    const scrollLinks = document.querySelectorAll('.smooth-scroll, a[href^="#"]');
+    
+    scrollLinks.forEach(anchor => {
         anchor.addEventListener('click', function(e) {
-            const href = this.getAttribute('href');
-            if (href === '#') return;
+            let href = this.getAttribute('href');
+            if (!href) return;
             
-            e.preventDefault();
-            const target = document.querySelector(href);
+            // Check if we are currently on the index/home page
+            const isHomePage = window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/') || window.location.pathname === '';
             
-            if (target) {
-                smoothScrollTo(target);
+            if (isHomePage) {
+                if (href === 'index.html' || href === '#') {
+                    e.preventDefault();
+                    smoothScrollTo(document.body);
+                    return;
+                }
+                if (href.startsWith('index.html#')) {
+                    href = href.substring(10); // extract just the '#target' part
+                }
+            } else {
+                // If not on index.html, let the browser navigate normally
+                if (href.startsWith('index.html')) return;
+            }
+            
+            if (href.startsWith('#')) {
+                const target = document.querySelector(href);
+                if (target) {
+                    e.preventDefault();
+                    smoothScrollTo(target);
+                }
             }
         });
     });
 }
 
-// Custom smooth scroll function for better control
+// Custom smooth scroll function with header offset
 function smoothScrollTo(element, duration = 800) {
-    const targetPosition = element.getBoundingClientRect().top + window.pageYOffset;
+    const headerOffset = 100; // Account for fixed navbar height
+    const elementPosition = element.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+    
     const startPosition = window.pageYOffset;
-    const distance = targetPosition - startPosition;
+    const distance = offsetPosition - startPosition;
     let startTime = null;
     
     function animation(currentTime) {
